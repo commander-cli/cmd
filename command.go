@@ -30,10 +30,10 @@ type Command struct {
 //NewCommand creates a new command
 func NewCommand(cmd string, options ...func(*Command)) *Command {
 	c := &Command{
-		Command:      cmd,
-		Timeout:      1 * time.Minute,
-		executed:     false,
-		Env:          []string{},
+		Command:  cmd,
+		Timeout:  1 * time.Minute,
+		executed: false,
+		Env:      []string{},
 	}
 
 	c.StdoutWriter = &c.stdout

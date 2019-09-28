@@ -37,7 +37,7 @@ func TestCommand_WithValidTimeout(t *testing.T) {
 }
 
 func TestCommand_WithWorkingDir(t *testing.T) {
-	setWorkingDir := func (c *Command) {
+	setWorkingDir := func(c *Command) {
 		c.WorkingDir = "/tmp"
 	}
 
