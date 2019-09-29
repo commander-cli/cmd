@@ -22,7 +22,7 @@ func TestCommand_Execute(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.True(t, cmd.Executed())
-	assert.Equal(t, cmd.Stdout(), "hello\n")
+	assertEqualWithLineBreak(t, "hello", cmd.Stdout())
 }
 
 func TestCommand_ExitCode(t *testing.T) {
@@ -44,7 +44,7 @@ func TestCommand_WithEnvVariables(t *testing.T) {
 
 	_ = cmd.Execute()
 
-	assert.Equal(t, cmd.Stdout(), "hey\n")
+	assertEqualWithLineBreak(t, "hey", cmd.Stdout())
 }
 
 func TestCommand_Executed(t *testing.T) {
@@ -77,7 +77,7 @@ func TestCommand_AddEnvWithShellVariable(t *testing.T) {
 	err := c.Execute()
 
 	assert.Nil(t, err)
-	assert.Equal(t, "test from shell\n", c.Stdout())
+	assertEqualWithLineBreak(t, "test from shell", c.Stdout())
 }
 
 func TestCommand_AddMultipleEnvWithShellVariable(t *testing.T) {
@@ -97,7 +97,7 @@ func TestCommand_AddMultipleEnvWithShellVariable(t *testing.T) {
 	err := c.Execute()
 
 	assert.Nil(t, err)
-	assert.Equal(t, "Hello world, I am Simon\n", c.Stdout())
+	assertEqualWithLineBreak(t, "Hello world, I am Simon", c.Stdout())
 }
 
 func getCommand() string {
@@ -149,5 +149,15 @@ func TestCommand_SetOptions(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, time.Duration(1000000000), c.Timeout)
-	assert.Equal(t, "test\n", writer.String())
+	assertEqualWithLineBreak(t, "test", writer.String())
+}
+
+func assertEqualWithLineBreak(t *testing.T, expected string, actual string) {
+	if runtime.GOOS == "windows" {
+		expected = expected + "\r\n"
+	} else {
+		expected = expected + "\n"
+	}
+
+	assert.Equal(t, expected, actual)
 }

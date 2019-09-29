@@ -12,7 +12,7 @@ func TestCommand_ExecuteStderr(t *testing.T) {
 	err := cmd.Execute()
 
 	assert.Nil(t, err)
-	assert.Equal(t, "hello ", cmd.Stderr())
+	assertEqualWithLineBreak(t, "hello ", cmd.Stderr())
 }
 
 func TestCommand_WithTimeout(t *testing.T) {

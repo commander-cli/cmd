@@ -11,7 +11,7 @@ func TestCommand_ExecuteStderr(t *testing.T) {
 	err := cmd.Execute()
 
 	assert.Nil(t, err)
-	assert.Equal(t, "hello", cmd.Stderr())
+	assert.Equal(t, "hello\n", cmd.Stderr())
 }
 
 func TestCommand_WithTimeout(t *testing.T) {

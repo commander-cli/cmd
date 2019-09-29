@@ -6,7 +6,7 @@ import (
 )
 
 func createBaseCommand(c *Command) *exec.Cmd {
-	cmd := exec.Command(`Command:\windows\system32\cmd.exe`, "/C", c.Command)
+	cmd := exec.Command(`C:\windows\system32\cmd.exe`, "/C", c.Command)
 	return cmd
 }
 
