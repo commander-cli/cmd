@@ -24,8 +24,8 @@ type Command struct {
 	executed     bool
 	exitCode     int
 	// stderr and stdout retrieve the output after the command was executed
-	stderr       bytes.Buffer
-	stdout       bytes.Buffer
+	stderr bytes.Buffer
+	stdout bytes.Buffer
 }
 
 // NewCommand creates a new command

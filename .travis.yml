@@ -32,7 +32,7 @@ jobs:
       before_install:
         - choco install make
       script:
-        - make test
+        - make test-windows
 
     - name: Unit tests
       before_script:

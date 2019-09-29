@@ -62,7 +62,7 @@ func TestCommand_WithStandardStreams(t *testing.T) {
 	cmd := NewCommand("echo hey", WithStandardStreams)
 	cmd.Execute()
 
-	r, err  := ioutil.ReadFile(tmpFile.Name())
+	r, err := ioutil.ReadFile(tmpFile.Name())
 	assert.Nil(t, err)
 	assert.Equal(t, "hey\n", string(r))
 }

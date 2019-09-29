@@ -1,8 +1,8 @@
-package main
+package examples
 
 import "github.com/SimonBaeumer/cmd"
 
-func main() {
+func CreateWithWorkingDir() {
 	setWorkingDir := func(c *cmd.Command) {
 		c.WorkingDir = "/tmp"
 	}
