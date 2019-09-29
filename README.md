@@ -15,22 +15,22 @@ A simple package to execute shell commands on linux, darwin and windows.
 ## Usage
 
 ```go
-cmd := cmd.NewCommand("echo hello")
+c := cmd.NewCommand("echo hello")
 
-err := cmd.Execute()
+err := c.Execute()
 if err != nil {
     panic(err.Error())    
 }
 
-fmt.Println(cmd.Stdout())
-fmt.Println(cmd.Stderr())
+fmt.Println(c.Stdout())
+fmt.Println(c.Stderr())
 ```
 
 ### Stream output to stderr and stdout
 
 ```go
-cmd := cmd.NewCommand("echo hello", cmd.WithStandardStreams)
-cmd.Execute()
+c := cmd.NewCommand("echo hello", cmd.WithStandardStreams)
+c.Execute()
 ```
 
 ### Set custom options
@@ -44,8 +44,8 @@ func SetWorkingDir(c *Command) {
     c.WorkingDir = "/tmp/test"
 }
 
-cmd := NewCommand("pwd", SetTimeout, SetWorkingDir)
-cmd.Execute()
+c := cmd.NewCommand("pwd", SetTimeout, SetWorkingDir)
+c.Execute()
 ```
 
 ## Development
