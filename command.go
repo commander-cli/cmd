@@ -22,12 +22,26 @@ type Command struct {
 	StdoutWriter io.Writer
 	WorkingDir   string
 	executed     bool
+	exitCode     int
+	// stderr and stdout retrieve the output after the command was executed
 	stderr       bytes.Buffer
 	stdout       bytes.Buffer
-	exitCode     int
 }
 
-//NewCommand creates a new command
+// NewCommand creates a new command
+// You can add option with variadic option argument
+//
+// Example:
+//      c := cmd.NewCommand("echo hello", function (c *Command) {
+//		    c.WorkingDir = "/tmp"
+//      })
+//      c.Execute()
+//
+// or you can use existing options functions
+//
+//      c := cmd.NewCommand("echo hello", cmd.WithStandardStreams)
+//      c.Execute()
+//
 func NewCommand(cmd string, options ...func(*Command)) *Command {
 	c := &Command{
 		Command:  cmd,

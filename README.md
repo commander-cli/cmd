@@ -6,7 +6,7 @@
 
 # cmd package
 
-A simple package to execute shell commands on windows, darwin and windows.
+A simple package to execute shell commands on linux, darwin and windows.
 
 ## Usage
 
@@ -58,6 +58,4 @@ make test
     - Coverage reports
     - Go report
     - Codeclimate
- - Travis-Pipeline
- - Documentation
  - os.Stdout and os.Stderr output access after execution

@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"github.com/stretchr/testify/assert"
+	"io/ioutil"
+	"os"
 	"strings"
 	"testing"
 )
@@ -48,8 +50,19 @@ func TestCommand_WithWorkingDir(t *testing.T) {
 }
 
 func TestCommand_WithStandardStreams(t *testing.T) {
+	tmpFile, _ := ioutil.TempFile("/tmp", "stdout_")
+	originalStdout := os.Stdout
+	os.Stdout = tmpFile
+
+	// Reset os.Stdout to its original value
+	defer func() {
+		os.Stdout = originalStdout
+	}()
+
 	cmd := NewCommand("echo hey", WithStandardStreams)
 	cmd.Execute()
 
-	assert.Equal(t, "/tmp\n", cmd.Stdout())
+	r, err  := ioutil.ReadFile(tmpFile.Name())
+	assert.Nil(t, err)
+	assert.Equal(t, "hey\n", string(r))
 }
