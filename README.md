@@ -15,7 +15,7 @@ A simple package to execute shell commands on linux, darwin and windows.
 ## Usage
 
 ```go
-cmd := NewCommand("echo hello")
+cmd := cmd.NewCommand("echo hello")
 
 err := cmd.Execute()
 if err != nil {
@@ -29,7 +29,7 @@ fmt.Println(cmd.Stderr())
 ### Stream output to stderr and stdout
 
 ```go
-cmd := NewCommand("echo hello", cmd.WithStandardStreams)
+cmd := cmd.NewCommand("echo hello", cmd.WithStandardStreams)
 cmd.Execute()
 ```
 
@@ -58,4 +58,4 @@ make test
 
 ### ToDo
 
- - os.Stdout and os.Stderr output access after execution
+ - os.Stdout and os.Stderr output access after execution via `c.Stdout()` and `c.Stderr()`

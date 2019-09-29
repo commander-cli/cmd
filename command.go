@@ -60,7 +60,14 @@ func NewCommand(cmd string, options ...func(*Command)) *Command {
 	return c
 }
 
-// WithStandardStreams creates a command which steams its output to the stderr and stdout streams of the operating system
+// WithStandardStreams is used as an option by the NewCommand constructor function and writes the output streams
+// to stderr and stdout of the operating system
+//
+// Example:
+//
+//      c := cmd.NewCommand("echo hello", cmd.WithStandardStreams)
+//      c.Execute()
+//
 func WithStandardStreams(c *Command) {
 	c.StdoutWriter = os.Stdout
 	c.StderrWriter = os.Stderr
@@ -77,7 +84,7 @@ func (c *Command) AddEnv(key string, value string) {
 	c.Env = append(c.Env, fmt.Sprintf("%s=%s", key, value))
 }
 
-// Removes the ${...} characters
+// Removes the ${...} characters at the beginng and end of the given string
 func removeEnvVarSyntax(v string) string {
 	return v[2:(len(v) - 1)]
 }
