@@ -22,7 +22,11 @@ func TestCommand_Execute(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.True(t, cmd.Executed())
-	assert.Equal(t, cmd.Stdout(), "hello\n")
+	if runtime.GOOS == "windows" {
+		assert.Equal(t, cmd.Stdout(), "hello\r\n")
+	} else {
+		assert.Equal(t, cmd.Stdout(), "hello\n")
+	}
 }
 
 func TestCommand_ExitCode(t *testing.T) {

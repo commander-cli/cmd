@@ -8,6 +8,10 @@
 
 A simple package to execute shell commands on linux, darwin and windows.
 
+## Installation
+
+`$ go get -u github.com/SimonBaeumer/cmd@v1.0.0`
+
 ## Usage
 
 ```go
@@ -25,7 +29,7 @@ fmt.Println(cmd.Stderr())
 ### Stream output to stderr and stdout
 
 ```go
-cmd := NewCommand("echo hello", WithStandardStreams)
+cmd := NewCommand("echo hello", cmd.WithStandardStreams)
 cmd.Execute()
 ```
 
@@ -54,8 +58,4 @@ make test
 
 ### ToDo
 
- - Reports
-    - Coverage reports
-    - Go report
-    - Codeclimate
  - os.Stdout and os.Stderr output access after execution
