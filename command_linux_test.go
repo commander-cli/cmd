@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestCommand_ExecuteStderr(t *testing.T) {
@@ -18,8 +19,7 @@ func TestCommand_ExecuteStderr(t *testing.T) {
 }
 
 func TestCommand_WithTimeout(t *testing.T) {
-	cmd := NewCommand("sleep 0.01;")
-	cmd.SetTimeoutMS(1)
+	cmd := NewCommand("sleep 0.01;", WithTimeout(1*time.Millisecond))
 
 	err := cmd.Execute()
 
@@ -30,8 +30,7 @@ func TestCommand_WithTimeout(t *testing.T) {
 }
 
 func TestCommand_WithValidTimeout(t *testing.T) {
-	cmd := NewCommand("sleep 0.01;")
-	cmd.SetTimeoutMS(500)
+	cmd := NewCommand("sleep 0.01;", WithTimeout(500*time.Millisecond))
 
 	err := cmd.Execute()
 

@@ -65,12 +65,23 @@ func NewCommand(cmd string, options ...func(*Command)) *Command {
 //
 // Example:
 //
-//      c := cmd.NewCommand("echo hello", cmd.WithStandardStreams)
-//      c.Execute()
+//     c := cmd.NewCommand("echo hello", cmd.WithStandardStreams)
+//     c.Execute()
 //
 func WithStandardStreams(c *Command) {
 	c.StdoutWriter = os.Stdout
 	c.StderrWriter = os.Stderr
+}
+
+// WithTimeout sets the timeout of the command
+//
+// Example:
+//     cmd.NewCommand("sleep 10;", cmd.WithTimeout(500))
+//
+func WithTimeout(t time.Duration) func(c *Command) {
+	return func(c *Command) {
+		c.Timeout = t
+	}
 }
 
 // AddEnv adds an environment variable to the command
@@ -95,27 +106,6 @@ func parseEnvVariableFromShell(val string) []string {
 	reg := regexp.MustCompile(`\$\{.*?\}`)
 	matches := reg.FindAllString(val, -1)
 	return matches
-}
-
-//SetTimeoutMS sets the timeout in milliseconds
-func (c *Command) SetTimeoutMS(ms int) {
-	if ms == 0 {
-		c.Timeout = 1 * time.Minute
-		return
-	}
-	c.Timeout = time.Duration(ms) * time.Millisecond
-}
-
-// SetTimeout sets the timeout given a time unit
-// Example: SetTimeout("100s") sets the timeout to 100 seconds
-func (c *Command) SetTimeout(timeout string) error {
-	d, err := time.ParseDuration(timeout)
-	if err != nil {
-		return err
-	}
-
-	c.Timeout = d
-	return nil
 }
 
 //Stdout returns the output to stdout
@@ -162,9 +152,18 @@ func (c *Command) Execute() error {
 		return err
 	}
 
-	done := make(chan error)
+	done := make(chan error, 1)
+	defer close(done)
+	quit := make(chan bool, 1)
+	defer close(quit)
+
 	go func() {
-		done <- cmd.Wait()
+		select {
+		case <-quit:
+			return
+		case done <- cmd.Wait():
+			return
+		}
 	}()
 
 	select {
@@ -175,6 +174,7 @@ func (c *Command) Execute() error {
 		}
 		c.exitCode = 0
 	case <-time.After(c.Timeout):
+		quit <- true
 		if err := cmd.Process.Kill(); err != nil {
 			return fmt.Errorf("Timeout occurred and can not kill process with pid %v", cmd.Process.Pid)
 		}

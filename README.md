@@ -26,25 +26,30 @@ fmt.Println(c.Stdout())
 fmt.Println(c.Stderr())
 ```
 
-### Stream output to stderr and stdout
+### Configure the command
+
+To configure the command a option function will be passed which receives the command object as an argument passed by reference.
+
+Default option functions:
+
+ - `cmd.WithStandardStreams`
+ - `cmd.WithTimeout(time.Duration)`
+
+#### Example
 
 ```go
 c := cmd.NewCommand("echo hello", cmd.WithStandardStreams)
 c.Execute()
 ```
 
-### Set custom options
+#### Set custom options
 
 ```go
-func SetTimeout(c *Command) {
-    c.Timeout = 1 * time.Hour
-}
-
-func SetWorkingDir(c *Command) {
+setWorkingDir := func (c *Command) {
     c.WorkingDir = "/tmp/test"
 }
 
-c := cmd.NewCommand("pwd", SetTimeout, SetWorkingDir)
+c := cmd.NewCommand("pwd", setWorkingDir)
 c.Execute()
 ```
 
