@@ -30,6 +30,7 @@ type Command struct {
 
 // NewCommand creates a new command
 // You can add option with variadic option argument
+// Default timeout is set to 30 minutes
 //
 // Example:
 //      c := cmd.NewCommand("echo hello", function (c *Command) {
@@ -45,7 +46,7 @@ type Command struct {
 func NewCommand(cmd string, options ...func(*Command)) *Command {
 	c := &Command{
 		Command:  cmd,
-		Timeout:  1 * time.Minute,
+		Timeout:  30 * time.Minute,
 		executed: false,
 		Env:      []string{},
 	}
@@ -82,6 +83,11 @@ func WithTimeout(t time.Duration) func(c *Command) {
 	return func(c *Command) {
 		c.Timeout = t
 	}
+}
+
+// WithoutTimeout disables the timeout for the command
+func WithoutTimeout(c *Command) {
+	c.Timeout = 0
 }
 
 // AddEnv adds an environment variable to the command
@@ -147,6 +153,12 @@ func (c *Command) Execute() error {
 	cmd.Stderr = c.StderrWriter
 	cmd.Dir = c.WorkingDir
 
+	// Create timer only if timeout was set > 0
+	var timeoutChan = make(<-chan time.Time, 1)
+	if c.Timeout != 0 {
+		timeoutChan = time.After(c.Timeout)
+	}
+
 	err := cmd.Start()
 	if err != nil {
 		return err
@@ -173,7 +185,7 @@ func (c *Command) Execute() error {
 			break
 		}
 		c.exitCode = 0
-	case <-time.After(c.Timeout):
+	case <-timeoutChan:
 		quit <- true
 		if err := cmd.Process.Kill(); err != nil {
 			return fmt.Errorf("Timeout occurred and can not kill process with pid %v", cmd.Process.Pid)
@@ -181,7 +193,6 @@ func (c *Command) Execute() error {
 		return fmt.Errorf("Command timed out after %v", c.Timeout)
 	}
 
-	//Remove leading and trailing whitespaces
 	c.executed = true
 
 	return nil

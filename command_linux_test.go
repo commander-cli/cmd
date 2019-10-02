@@ -19,7 +19,7 @@ func TestCommand_ExecuteStderr(t *testing.T) {
 }
 
 func TestCommand_WithTimeout(t *testing.T) {
-	cmd := NewCommand("sleep 0.01;", WithTimeout(1*time.Millisecond))
+	cmd := NewCommand("sleep 0.1;", WithTimeout(1*time.Millisecond))
 
 	err := cmd.Execute()
 
@@ -64,4 +64,13 @@ func TestCommand_WithStandardStreams(t *testing.T) {
 	r, err := ioutil.ReadFile(tmpFile.Name())
 	assert.Nil(t, err)
 	assert.Equal(t, "hey\n", string(r))
+}
+
+func TestCommand_WithoutTimeout(t *testing.T) {
+	cmd := NewCommand("sleep 0.001; echo hello", WithoutTimeout)
+
+	err := cmd.Execute()
+
+	assert.Nil(t, err)
+	assert.Equal(t, "hello\n", cmd.Stdout())
 }
