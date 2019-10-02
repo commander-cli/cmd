@@ -4,6 +4,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestCommand_ExecuteStderr(t *testing.T) {
@@ -16,8 +17,7 @@ func TestCommand_ExecuteStderr(t *testing.T) {
 }
 
 func TestCommand_WithTimeout(t *testing.T) {
-	cmd := NewCommand("timeout 0.005;")
-	cmd.SetTimeoutMS(5)
+	cmd := NewCommand("timeout 0.005;", WithTimeout(5*time.Millisecond))
 
 	err := cmd.Execute()
 
@@ -28,8 +28,7 @@ func TestCommand_WithTimeout(t *testing.T) {
 }
 
 func TestCommand_WithValidTimeout(t *testing.T) {
-	cmd := NewCommand("timeout 0.01;")
-	cmd.SetTimeoutMS(1000)
+	cmd := NewCommand("timeout 0.01;", WithTimeout(1000*time.Millisecond))
 
 	err := cmd.Execute()
 

@@ -6,8 +6,6 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"regexp"
-	"strings"
 	"syscall"
 	"time"
 )
@@ -30,6 +28,7 @@ type Command struct {
 
 // NewCommand creates a new command
 // You can add option with variadic option argument
+// Default timeout is set to 30 minutes
 //
 // Example:
 //      c := cmd.NewCommand("echo hello", function (c *Command) {
@@ -45,7 +44,7 @@ type Command struct {
 func NewCommand(cmd string, options ...func(*Command)) *Command {
 	c := &Command{
 		Command:  cmd,
-		Timeout:  1 * time.Minute,
+		Timeout:  30 * time.Minute,
 		executed: false,
 		Env:      []string{},
 	}
@@ -65,57 +64,42 @@ func NewCommand(cmd string, options ...func(*Command)) *Command {
 //
 // Example:
 //
-//      c := cmd.NewCommand("echo hello", cmd.WithStandardStreams)
-//      c.Execute()
+//     c := cmd.NewCommand("echo hello", cmd.WithStandardStreams)
+//     c.Execute()
 //
 func WithStandardStreams(c *Command) {
 	c.StdoutWriter = os.Stdout
 	c.StderrWriter = os.Stderr
 }
 
+// WithTimeout sets the timeout of the command
+//
+// Example:
+//     cmd.NewCommand("sleep 10;", cmd.WithTimeout(500))
+//
+func WithTimeout(t time.Duration) func(c *Command) {
+	return func(c *Command) {
+		c.Timeout = t
+	}
+}
+
+// WithoutTimeout disables the timeout for the command
+func WithoutTimeout(c *Command) {
+	c.Timeout = 0
+}
+
+// WithWorkingDir sets the current working directory
+func WithWorkingDir(dir string) func(c *Command) {
+	return func(c *Command) {
+		c.WorkingDir = dir
+	}
+}
+
 // AddEnv adds an environment variable to the command
 // If a variable gets passed like ${VAR_NAME} the env variable will be read out by the current shell
 func (c *Command) AddEnv(key string, value string) {
-	vars := parseEnvVariableFromShell(value)
-	for _, v := range vars {
-		value = strings.Replace(value, v, os.Getenv(removeEnvVarSyntax(v)), -1)
-	}
-
+	value = os.ExpandEnv(value)
 	c.Env = append(c.Env, fmt.Sprintf("%s=%s", key, value))
-}
-
-// Removes the ${...} characters at the beginng and end of the given string
-func removeEnvVarSyntax(v string) string {
-	return v[2:(len(v) - 1)]
-}
-
-//Read all environment variables from the given value
-//with the syntax ${VAR_NAME}
-func parseEnvVariableFromShell(val string) []string {
-	reg := regexp.MustCompile(`\$\{.*?\}`)
-	matches := reg.FindAllString(val, -1)
-	return matches
-}
-
-//SetTimeoutMS sets the timeout in milliseconds
-func (c *Command) SetTimeoutMS(ms int) {
-	if ms == 0 {
-		c.Timeout = 1 * time.Minute
-		return
-	}
-	c.Timeout = time.Duration(ms) * time.Millisecond
-}
-
-// SetTimeout sets the timeout given a time unit
-// Example: SetTimeout("100s") sets the timeout to 100 seconds
-func (c *Command) SetTimeout(timeout string) error {
-	d, err := time.ParseDuration(timeout)
-	if err != nil {
-		return err
-	}
-
-	c.Timeout = d
-	return nil
 }
 
 //Stdout returns the output to stdout
@@ -157,14 +141,28 @@ func (c *Command) Execute() error {
 	cmd.Stderr = c.StderrWriter
 	cmd.Dir = c.WorkingDir
 
+	// Create timer only if timeout was set > 0
+	var timeoutChan = make(<-chan time.Time, 1)
+	if c.Timeout != 0 {
+		timeoutChan = time.After(c.Timeout)
+	}
+
 	err := cmd.Start()
 	if err != nil {
 		return err
 	}
 
-	done := make(chan error)
+	done := make(chan error, 1)
+	quit := make(chan bool, 1)
+	defer close(quit)
+
 	go func() {
-		done <- cmd.Wait()
+		select {
+		case <-quit:
+			return
+		case done <- cmd.Wait():
+			return
+		}
 	}()
 
 	select {
@@ -174,14 +172,14 @@ func (c *Command) Execute() error {
 			break
 		}
 		c.exitCode = 0
-	case <-time.After(c.Timeout):
+	case <-timeoutChan:
+		quit <- true
 		if err := cmd.Process.Kill(); err != nil {
 			return fmt.Errorf("Timeout occurred and can not kill process with pid %v", cmd.Process.Pid)
 		}
 		return fmt.Errorf("Command timed out after %v", c.Timeout)
 	}
 
-	//Remove leading and trailing whitespaces
 	c.executed = true
 
 	return nil

@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestCommand_ExecuteStderr(t *testing.T) {
@@ -18,8 +19,7 @@ func TestCommand_ExecuteStderr(t *testing.T) {
 }
 
 func TestCommand_WithTimeout(t *testing.T) {
-	cmd := NewCommand("sleep 0.01;")
-	cmd.SetTimeoutMS(1)
+	cmd := NewCommand("sleep 0.1;", WithTimeout(1*time.Millisecond))
 
 	err := cmd.Execute()
 
@@ -30,8 +30,7 @@ func TestCommand_WithTimeout(t *testing.T) {
 }
 
 func TestCommand_WithValidTimeout(t *testing.T) {
-	cmd := NewCommand("sleep 0.01;")
-	cmd.SetTimeoutMS(500)
+	cmd := NewCommand("sleep 0.01;", WithTimeout(500*time.Millisecond))
 
 	err := cmd.Execute()
 
@@ -65,4 +64,20 @@ func TestCommand_WithStandardStreams(t *testing.T) {
 	r, err := ioutil.ReadFile(tmpFile.Name())
 	assert.Nil(t, err)
 	assert.Equal(t, "hey\n", string(r))
+}
+
+func TestCommand_WithoutTimeout(t *testing.T) {
+	cmd := NewCommand("sleep 0.001; echo hello", WithoutTimeout)
+
+	err := cmd.Execute()
+
+	assert.Nil(t, err)
+	assert.Equal(t, "hello\n", cmd.Stdout())
+}
+
+func TestCommand_WithInvalidDir(t *testing.T) {
+	cmd := NewCommand("echo hello", WithWorkingDir("/invalid"))
+	err := cmd.Execute()
+	assert.NotNil(t, err)
+	assert.Equal(t, "chdir /invalid: no such file or directory", err.Error())
 }

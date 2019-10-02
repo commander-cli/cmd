@@ -81,8 +81,8 @@ func TestCommand_AddEnvWithShellVariable(t *testing.T) {
 }
 
 func TestCommand_AddMultipleEnvWithShellVariable(t *testing.T) {
-	const TestEnvKeyPlanet = "COMMANDER_TEST_PLANET"
-	const TestEnvKeyName = "COMMANDER_TEST_NAME"
+	const TestEnvKeyPlanet = "CMD_TEST_PLANET"
+	const TestEnvKeyName = "CMD_TEST_NAME"
 	os.Setenv(TestEnvKeyPlanet, "world")
 	os.Setenv(TestEnvKeyName, "Simon")
 	defer func() {
@@ -106,31 +106,6 @@ func getCommand() string {
 		command = "echo %SOME_KEY%"
 	}
 	return command
-}
-
-func TestCommand_SetTimeoutMS_DefaultTimeout(t *testing.T) {
-	c := NewCommand("echo test")
-	c.SetTimeoutMS(0)
-	assert.Equal(t, (1 * time.Minute), c.Timeout)
-}
-
-func TestCommand_SetTimeoutMS(t *testing.T) {
-	c := NewCommand("echo test")
-	c.SetTimeoutMS(100)
-	assert.Equal(t, 100*time.Millisecond, c.Timeout)
-}
-
-func TestCommand_SetTimeout(t *testing.T) {
-	c := NewCommand("echo test")
-	_ = c.SetTimeout("100s")
-	duration, _ := time.ParseDuration("100s")
-	assert.Equal(t, duration, c.Timeout)
-}
-
-func TestCommand_SetInvalidTimeout(t *testing.T) {
-	c := NewCommand("echo test")
-	err := c.SetTimeout("1")
-	assert.Equal(t, "time: missing unit in duration 1", err.Error())
 }
 
 func TestCommand_SetOptions(t *testing.T) {
