@@ -174,7 +174,6 @@ func (c *Command) Execute() error {
 		c.exitCode = 0
 	case <-timeoutChan:
 		quit <- true
-		close(done)
 		if err := cmd.Process.Kill(); err != nil {
 			return fmt.Errorf("Timeout occurred and can not kill process with pid %v", cmd.Process.Pid)
 		}
