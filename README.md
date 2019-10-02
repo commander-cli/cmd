@@ -36,6 +36,7 @@ Default option functions:
  - `cmd.WithTimeout(time.Duration)`
  - `cmd.WithoutTimeout`
  - `cmd.WithWorkingDir(string)`
+ - `cmd.WithEnvironment`
 
 #### Example
 

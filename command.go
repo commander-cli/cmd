@@ -95,6 +95,11 @@ func WithWorkingDir(dir string) func(c *Command) {
 	}
 }
 
+// WithEnvironment adds all environments from the current process to the command
+func WithEnvironment(c *Command) {
+	c.Env = os.Environ()
+}
+
 // AddEnv adds an environment variable to the command
 // If a variable gets passed like ${VAR_NAME} the env variable will be read out by the current shell
 func (c *Command) AddEnv(key string, value string) {
