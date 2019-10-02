@@ -35,6 +35,7 @@ Default option functions:
  - `cmd.WithStandardStreams`
  - `cmd.WithTimeout(time.Duration)`
  - `cmd.WithoutTimeout`
+ - `cmd.WithWorkingDir(string)`
 
 #### Example
 

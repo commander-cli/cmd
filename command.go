@@ -6,7 +6,6 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"regexp"
 	"syscall"
 	"time"
 )
@@ -89,19 +88,18 @@ func WithoutTimeout(c *Command) {
 	c.Timeout = 0
 }
 
+// WithWorkingDir sets the current working directory
+func WithWorkingDir(dir string) func(c *Command) {
+	return func(c *Command) {
+		c.WorkingDir = dir
+	}
+}
+
 // AddEnv adds an environment variable to the command
 // If a variable gets passed like ${VAR_NAME} the env variable will be read out by the current shell
 func (c *Command) AddEnv(key string, value string) {
 	value = os.ExpandEnv(value)
 	c.Env = append(c.Env, fmt.Sprintf("%s=%s", key, value))
-}
-
-//Read all environment variables from the given value
-//with the syntax ${VAR_NAME}
-func parseEnvVariableFromShell(val string) []string {
-	reg := regexp.MustCompile(`\$\{.*?\}`)
-	matches := reg.FindAllString(val, -1)
-	return matches
 }
 
 //Stdout returns the output to stdout

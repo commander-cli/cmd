@@ -74,3 +74,10 @@ func TestCommand_WithoutTimeout(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "hello\n", cmd.Stdout())
 }
+
+func TestCommand_WithInvalidDir(t *testing.T) {
+	cmd := NewCommand("echo hello", WithWorkingDir("/invalid"))
+	err := cmd.Execute()
+	assert.NotNil(t, err)
+	assert.Equal(t, "chdir /invalid: no such file or directory", err.Error())
+}
