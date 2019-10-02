@@ -81,8 +81,8 @@ func TestCommand_AddEnvWithShellVariable(t *testing.T) {
 }
 
 func TestCommand_AddMultipleEnvWithShellVariable(t *testing.T) {
-	const TestEnvKeyPlanet = "COMMANDER_TEST_PLANET"
-	const TestEnvKeyName = "COMMANDER_TEST_NAME"
+	const TestEnvKeyPlanet = "CMD_TEST_PLANET"
+	const TestEnvKeyName = "CMD_TEST_NAME"
 	os.Setenv(TestEnvKeyPlanet, "world")
 	os.Setenv(TestEnvKeyName, "Simon")
 	defer func() {

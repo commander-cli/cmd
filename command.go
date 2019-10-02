@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
-	"strings"
 	"syscall"
 	"time"
 )
@@ -93,17 +92,8 @@ func WithoutTimeout(c *Command) {
 // AddEnv adds an environment variable to the command
 // If a variable gets passed like ${VAR_NAME} the env variable will be read out by the current shell
 func (c *Command) AddEnv(key string, value string) {
-	vars := parseEnvVariableFromShell(value)
-	for _, v := range vars {
-		value = strings.Replace(value, v, os.Getenv(removeEnvVarSyntax(v)), -1)
-	}
-
+	value = os.ExpandEnv(value)
 	c.Env = append(c.Env, fmt.Sprintf("%s=%s", key, value))
-}
-
-// Removes the ${...} characters at the beginng and end of the given string
-func removeEnvVarSyntax(v string) string {
-	return v[2:(len(v) - 1)]
 }
 
 //Read all environment variables from the given value
