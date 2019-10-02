@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"time"
 )
 
 func TestCommand_ExecuteStderr(t *testing.T) {
@@ -15,8 +16,7 @@ func TestCommand_ExecuteStderr(t *testing.T) {
 }
 
 func TestCommand_WithTimeout(t *testing.T) {
-	cmd := NewCommand("sleep 0.5;")
-	cmd.SetTimeoutMS(5)
+	cmd := NewCommand("sleep 0.5;", WithTimeout(5*time.Millisecond))
 
 	err := cmd.Execute()
 
@@ -25,8 +25,7 @@ func TestCommand_WithTimeout(t *testing.T) {
 }
 
 func TestCommand_WithValidTimeout(t *testing.T) {
-	cmd := NewCommand("sleep 0.01;")
-	cmd.SetTimeoutMS(500)
+	cmd := NewCommand("sleep 0.01;", WithTimeout(500*time.Millisecond))
 
 	err := cmd.Execute()
 
