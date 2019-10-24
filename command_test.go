@@ -126,10 +126,3 @@ func TestCommand_SetOptions(t *testing.T) {
 	assert.Equal(t, time.Duration(1000000000), c.Timeout)
 	assertEqualWithLineBreak(t, "test", writer.String())
 }
-
-func TestWithEnvironmentVariables(t *testing.T) {
-	c := NewCommand("echo $env", WithEnvironmentVariables(map[string]string{"env": "value"}))
-	c.Execute()
-
-	assertEqualWithLineBreak(t, "value", c.Stdout())
-}

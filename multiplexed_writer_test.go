@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
@@ -37,4 +38,20 @@ func TestMultiplexedWriter_SingleWirter(t *testing.T) {
 
 	assert.Equal(t, 7, n)
 	assert.Equal(t, "another", writer01.String())
+}
+
+func TestMultiplexedWriter_Fail(t *testing.T) {
+	writer := NewMultiplexedWriter(InvalidWriter{})
+
+	n, err := writer.Write([]byte(`another`))
+
+	assert.Equal(t, 0, n)
+	assert.Equal(t, "Error in writer: failed", err.Error())
+}
+
+type InvalidWriter struct {
+}
+
+func (w InvalidWriter) Write(p []byte) (n int, err error) {
+	return 0, fmt.Errorf("failed")
 }

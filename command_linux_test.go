@@ -131,3 +131,10 @@ func TestWithStandardStreams(t *testing.T) {
 	assertEqualWithLineBreak(t, "stderr\nstdout", out)
 	assert.Nil(t, err)
 }
+
+func TestWithEnvironmentVariables(t *testing.T) {
+	c := NewCommand("echo $env", WithEnvironmentVariables(map[string]string{"env": "value"}))
+	c.Execute()
+
+	assertEqualWithLineBreak(t, "value", c.Stdout())
+}

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"io"
 )
 
@@ -20,7 +21,7 @@ func (w MultiplexedWriter) Write(p []byte) (n int, err error) {
 	for _, o := range w.Outputs {
 		n, err = o.Write(p)
 		if err != nil {
-			return 0, nil
+			return 0, fmt.Errorf("Error in writer: %s", err.Error())
 		}
 	}
 
