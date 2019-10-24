@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bytes"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"os"
@@ -80,4 +81,53 @@ func TestCommand_WithInvalidDir(t *testing.T) {
 	err := cmd.Execute()
 	assert.NotNil(t, err)
 	assert.Equal(t, "chdir /invalid: no such file or directory", err.Error())
+}
+
+func TestWithInheritedEnvironment(t *testing.T) {
+	os.Setenv("FROM_OS", "is on os")
+	os.Setenv("OVERWRITE", "is on os but should be overwritten")
+	defer func() {
+		os.Unsetenv("FROM_OS")
+		os.Unsetenv("OVERWRITE")
+	}()
+
+	c := NewCommand(
+		"echo $FROM_OS $OVERWRITE",
+		WithInheritedEnvironment(map[string]string{"OVERWRITE": "overwritten"}))
+	c.Execute()
+
+	assertEqualWithLineBreak(t, "is on os overwritten", c.Stdout())
+}
+
+func TestWithCustomStderr(t *testing.T) {
+	writer := bytes.Buffer{}
+	c := NewCommand(">&2 echo stderr; sleep 0.01; echo stdout;", WithCustomStderr(&writer))
+	c.Execute()
+
+	assertEqualWithLineBreak(t, "stderr", writer.String())
+	assertEqualWithLineBreak(t, "stdout", c.Stdout())
+	assertEqualWithLineBreak(t, "stderr", c.Stderr())
+	assertEqualWithLineBreak(t, "stderr\nstdout", c.Combined())
+}
+
+func TestWithCustomStdout(t *testing.T) {
+	writer := bytes.Buffer{}
+	c := NewCommand(">&2 echo stderr; sleep 0.01; echo stdout;", WithCustomStdout(&writer))
+	c.Execute()
+
+	assertEqualWithLineBreak(t, "stdout", writer.String())
+	assertEqualWithLineBreak(t, "stdout", c.Stdout())
+	assertEqualWithLineBreak(t, "stderr", c.Stderr())
+	assertEqualWithLineBreak(t, "stderr\nstdout", c.Combined())
+}
+
+func TestWithStandardStreams(t *testing.T) {
+	out, err := CaptureStandardOutput(func() interface{} {
+		c := NewCommand(">&2 echo stderr; sleep 0.01; echo stdout;", WithStandardStreams)
+		err := c.Execute()
+		return err
+	})
+
+	assertEqualWithLineBreak(t, "stderr\nstdout", out)
+	assert.Nil(t, err)
 }
