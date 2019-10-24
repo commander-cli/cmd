@@ -126,13 +126,3 @@ func TestCommand_SetOptions(t *testing.T) {
 	assert.Equal(t, time.Duration(1000000000), c.Timeout)
 	assertEqualWithLineBreak(t, "test", writer.String())
 }
-
-func assertEqualWithLineBreak(t *testing.T, expected string, actual string) {
-	if runtime.GOOS == "windows" {
-		expected = expected + "\r\n"
-	} else {
-		expected = expected + "\n"
-	}
-
-	assert.Equal(t, expected, actual)
-}
