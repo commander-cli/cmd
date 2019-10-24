@@ -38,7 +38,8 @@ Default option functions:
  - `cmd.WithTimeout(time.Duration)`
  - `cmd.WithoutTimeout`
  - `cmd.WithWorkingDir(string)`
- - `cmd.WithEnvironment`
+ - `cmd.WithEnvironmentVariables(cmd.EnvVars)`
+ - `cmd.WithInheritedEnvironment(cmd.EnvVars)`
 
 #### Example
 

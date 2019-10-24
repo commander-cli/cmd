@@ -159,3 +159,24 @@ func TestWithStandardStreams(t *testing.T) {
 	assertEqualWithLineBreak(t, "stderr\nstdout", out)
 	assert.Nil(t, err)
 }
+
+func TestWithEnvironmentVariables(t *testing.T) {
+	c := NewCommand("echo $env", WithEnvironmentVariables(map[string]string{"env": "value"}))
+	c.Execute()
+
+	assert.Equal(t, "value", c.Stdout())
+}
+
+func TestWithInheritedEnvironment(t *testing.T) {
+	os.Setenv("FROM_OS", "is on os")
+	os.Setenv("OVERWRITE", "is on os but should be overwritten")
+	defer func() {
+		os.Unsetenv("FROM_OS")
+		os.Unsetenv("OVERWRITE")
+	}()
+
+	c := NewCommand("echo $FROM_OS $OVERWRITE", WithInheritedEnvironment(map[string]string{"OVERWRITE": "overwritten"}))
+	c.Execute()
+
+	assertEqualWithLineBreak(t, "is on os overwritten", c.Stdout())
+}

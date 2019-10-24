@@ -27,6 +27,15 @@ type Command struct {
 	combined bytes.Buffer
 }
 
+// EnvVars represents a map where the key is the name of the env variable
+// and the value is the value of the variable
+//
+// Example:
+//
+//  env := map[string]string{"ENV": "VALUE"}
+//
+type EnvVars map[string]string
+
 // NewCommand creates a new command
 // You can add option with variadic option argument
 // Default timeout is set to 30 minutes
@@ -116,9 +125,25 @@ func WithWorkingDir(dir string) func(c *Command) {
 	}
 }
 
-// WithEnvironment adds all environments from the current process to the command
-func WithEnvironment(c *Command) {
-	c.Env = os.Environ()
+// WithInheritedEnvironment uses the env from the current process and
+// allow to add more variables.
+func WithInheritedEnvironment(env EnvVars) func(c *Command) {
+	return func(c *Command) {
+		c.Env = os.Environ()
+
+		// Set custom variables
+		fn := WithEnvironmentVariables(env)
+		fn(c)
+	}
+}
+
+// WithEnvironmentVariables sets environment variables for the executed command
+func WithEnvironmentVariables(env EnvVars) func(c *Command) {
+	return func(c *Command) {
+		for key, value := range env {
+			c.AddEnv(key, value)
+		}
+	}
 }
 
 // AddEnv adds an environment variable to the command
