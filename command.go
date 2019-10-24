@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-//Command represents a single command which can be executed
+// Command represents a single command which can be executed
 type Command struct {
 	Command      string
 	Env          []string
@@ -22,8 +22,9 @@ type Command struct {
 	executed     bool
 	exitCode     int
 	// stderr and stdout retrieve the output after the command was executed
-	stderr bytes.Buffer
-	stdout bytes.Buffer
+	stderr   bytes.Buffer
+	stdout   bytes.Buffer
+	combined bytes.Buffer
 }
 
 // NewCommand creates a new command
@@ -68,8 +69,28 @@ func NewCommand(cmd string, options ...func(*Command)) *Command {
 //     c.Execute()
 //
 func WithStandardStreams(c *Command) {
-	c.StdoutWriter = os.Stdout
-	c.StderrWriter = os.Stderr
+	c.StdoutWriter = NewMultiplexedWriter(os.Stdout, &c.stdout, &c.combined)
+	c.StderrWriter = NewMultiplexedWriter(os.Stderr, &c.stdout, &c.combined)
+}
+
+// WithCustomStdout allows to add custom writers to stdout
+func WithCustomStdout(writers ...io.Writer) func(c *Command) {
+	return func(c *Command) {
+		writers = append(writers, &c.stdout, &c.combined)
+		c.StdoutWriter = NewMultiplexedWriter(writers...)
+
+		c.StderrWriter = NewMultiplexedWriter(&c.stderr, &c.combined)
+	}
+}
+
+// WithCustomStderr allows to add custom writers to stderr
+func WithCustomStderr(writers ...io.Writer) func(c *Command) {
+	return func(c *Command) {
+		writers = append(writers, &c.stderr, &c.combined)
+		c.StderrWriter = NewMultiplexedWriter(writers...)
+
+		c.StdoutWriter = NewMultiplexedWriter(&c.stdout, &c.combined)
+	}
 }
 
 // WithTimeout sets the timeout of the command
@@ -107,16 +128,22 @@ func (c *Command) AddEnv(key string, value string) {
 	c.Env = append(c.Env, fmt.Sprintf("%s=%s", key, value))
 }
 
-//Stdout returns the output to stdout
+// Stdout returns the output to stdout
 func (c *Command) Stdout() string {
 	c.isExecuted("Stdout")
 	return c.stdout.String()
 }
 
-//Stderr returns the output to stderr
+// Stderr returns the output to stderr
 func (c *Command) Stderr() string {
 	c.isExecuted("Stderr")
 	return c.stderr.String()
+}
+
+// Combined returns the combined output of stderr and stdout according to their timeline
+func (c *Command) Combined() string {
+	c.isExecuted("Combined")
+	return c.combined.String()
 }
 
 //ExitCode returns the exit code of the command

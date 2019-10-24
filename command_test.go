@@ -127,12 +127,35 @@ func TestCommand_SetOptions(t *testing.T) {
 	assertEqualWithLineBreak(t, "test", writer.String())
 }
 
-func assertEqualWithLineBreak(t *testing.T, expected string, actual string) {
-	if runtime.GOOS == "windows" {
-		expected = expected + "\r\n"
-	} else {
-		expected = expected + "\n"
-	}
+func TestWithCustomStderr(t *testing.T) {
+	writer := bytes.Buffer{}
+	c := NewCommand(">&2 echo stderr; sleep 0.01; echo stdout;", WithCustomStderr(&writer))
+	c.Execute()
 
-	assert.Equal(t, expected, actual)
+	assertEqualWithLineBreak(t, "stderr", writer.String())
+	assertEqualWithLineBreak(t, "stdout", c.Stdout())
+	assertEqualWithLineBreak(t, "stderr", c.Stderr())
+	assertEqualWithLineBreak(t, "stderr\nstdout", c.Combined())
+}
+
+func TestWithCustomStdout(t *testing.T) {
+	writer := bytes.Buffer{}
+	c := NewCommand(">&2 echo stderr; sleep 0.01; echo stdout;", WithCustomStdout(&writer))
+	c.Execute()
+
+	assertEqualWithLineBreak(t, "stdout", writer.String())
+	assertEqualWithLineBreak(t, "stdout", c.Stdout())
+	assertEqualWithLineBreak(t, "stderr", c.Stderr())
+	assertEqualWithLineBreak(t, "stderr\nstdout", c.Combined())
+}
+
+func TestWithStandardStreams(t *testing.T) {
+	out, err := CaptureStandardOutput(func() interface{} {
+		c := NewCommand(">&2 echo stderr; sleep 0.01; echo stdout;", WithStandardStreams)
+		err := c.Execute()
+		return err
+	})
+
+	assertEqualWithLineBreak(t, "stderr\nstdout", out)
+	assert.Nil(t, err)
 }
