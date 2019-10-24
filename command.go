@@ -87,8 +87,6 @@ func WithCustomStdout(writers ...io.Writer) func(c *Command) {
 	return func(c *Command) {
 		writers = append(writers, &c.stdout, &c.combined)
 		c.StdoutWriter = NewMultiplexedWriter(writers...)
-
-		c.StderrWriter = NewMultiplexedWriter(&c.stderr, &c.combined)
 	}
 }
 
@@ -97,8 +95,6 @@ func WithCustomStderr(writers ...io.Writer) func(c *Command) {
 	return func(c *Command) {
 		writers = append(writers, &c.stderr, &c.combined)
 		c.StderrWriter = NewMultiplexedWriter(writers...)
-
-		c.StdoutWriter = NewMultiplexedWriter(&c.stdout, &c.combined)
 	}
 }
 
