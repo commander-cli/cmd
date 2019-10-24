@@ -59,8 +59,8 @@ func NewCommand(cmd string, options ...func(*Command)) *Command {
 		Env:      []string{},
 	}
 
-	c.StdoutWriter = &c.stdout
-	c.StderrWriter = &c.stderr
+	c.StdoutWriter = NewMultiplexedWriter(&c.stdout, &c.combined)
+	c.StderrWriter = NewMultiplexedWriter(&c.stderr, &c.combined)
 
 	for _, o := range options {
 		o(c)

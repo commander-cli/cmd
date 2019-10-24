@@ -11,8 +11,11 @@ import (
 )
 
 func TestCommand_NewCommand(t *testing.T) {
-	cmd := NewCommand("")
-	assert.False(t, cmd.Executed())
+	cmd := NewCommand("echo hello")
+	cmd.Execute()
+
+	assertEqualWithLineBreak(t, "hello", cmd.Combined())
+	assertEqualWithLineBreak(t, "hello", cmd.Stdout())
 }
 
 func TestCommand_Execute(t *testing.T) {
