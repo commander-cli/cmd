@@ -11,7 +11,7 @@ import (
 func TestMultiplexedWriter(t *testing.T) {
 	writer01 := bytes.Buffer{}
 	writer02 := bytes.Buffer{}
-	// Test another io.Writer interface type
+	// Test another io.Writers interface type
 	r, w, _ := os.Pipe()
 
 	writer := NewMultiplexedWriter(&writer01, &writer02, w)
