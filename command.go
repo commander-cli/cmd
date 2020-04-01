@@ -59,8 +59,8 @@ func NewCommand(cmd string, options ...func(*Command)) *Command {
 		Env:      []string{},
 	}
 
-	c.StdoutWriter = NewMultiplexedWriter(&c.stdout, &c.combined)
-	c.StderrWriter = NewMultiplexedWriter(&c.stderr, &c.combined)
+	c.StdoutWriter = io.MultiWriter(&c.stdout, &c.combined)
+	c.StderrWriter = io.MultiWriter(&c.stderr, &c.combined)
 
 	for _, o := range options {
 		o(c)
@@ -78,15 +78,15 @@ func NewCommand(cmd string, options ...func(*Command)) *Command {
 //     c.Execute()
 //
 func WithStandardStreams(c *Command) {
-	c.StdoutWriter = NewMultiplexedWriter(os.Stdout, &c.stdout, &c.combined)
-	c.StderrWriter = NewMultiplexedWriter(os.Stderr, &c.stdout, &c.combined)
+	c.StdoutWriter = io.MultiWriter(os.Stdout, &c.stdout, &c.combined)
+	c.StderrWriter = io.MultiWriter(os.Stderr, &c.stdout, &c.combined)
 }
 
 // WithCustomStdout allows to add custom writers to stdout
 func WithCustomStdout(writers ...io.Writer) func(c *Command) {
 	return func(c *Command) {
 		writers = append(writers, &c.stdout, &c.combined)
-		c.StdoutWriter = NewMultiplexedWriter(writers...)
+		c.StdoutWriter = io.MultiWriter(writers...)
 	}
 }
 
@@ -94,7 +94,7 @@ func WithCustomStdout(writers ...io.Writer) func(c *Command) {
 func WithCustomStderr(writers ...io.Writer) func(c *Command) {
 	return func(c *Command) {
 		writers = append(writers, &c.stderr, &c.combined)
-		c.StderrWriter = NewMultiplexedWriter(writers...)
+		c.StderrWriter = io.MultiWriter(writers...)
 	}
 }
 
