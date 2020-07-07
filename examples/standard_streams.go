@@ -1,6 +1,6 @@
 package examples
 
-import "github.com/SimonBaeumer/cmd"
+import "github.com/commander-cli/cmd"
 
 // CreateNewCommandWithStandardStream create new standard stream example
 func CreateNewCommandWithStandardStream() {
