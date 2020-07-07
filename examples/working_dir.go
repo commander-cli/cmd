@@ -1,6 +1,6 @@
 package examples
 
-import "github.com/SimonBaeumer/cmd"
+import "github.com/commander-cli/cmd"
 
 // CreateWithWorkingDir sets the current working directory
 func CreateWithWorkingDir() {
