@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -19,6 +20,7 @@ type Command struct {
 	StderrWriter io.Writer
 	StdoutWriter io.Writer
 	WorkingDir   string
+	ctx          context.Context
 	executed     bool
 	exitCode     int
 	// stderr and stdout retrieve the output after the command was executed
@@ -57,6 +59,7 @@ func NewCommand(cmd string, options ...func(*Command)) *Command {
 		Timeout:  30 * time.Minute,
 		executed: false,
 		Env:      []string{},
+		ctx:      context.Background(),
 	}
 
 	c.StdoutWriter = io.MultiWriter(&c.stdout, &c.combined)
@@ -142,6 +145,12 @@ func WithEnvironmentVariables(env EnvVars) func(c *Command) {
 	}
 }
 
+func WithContext(ctx context.Context) func(c *Command) {
+	return func(c *Command) {
+		c.ctx = ctx
+	}
+}
+
 // AddEnv adds an environment variable to the command
 // If a variable gets passed like ${VAR_NAME} the env variable will be read out by the current shell
 func (c *Command) AddEnv(key string, value string) {
@@ -195,9 +204,10 @@ func (c *Command) Execute() error {
 	cmd.Dir = c.WorkingDir
 
 	// Create timer only if timeout was set > 0
-	var timeoutChan = make(<-chan time.Time, 1)
 	if c.Timeout != 0 {
-		timeoutChan = time.After(c.Timeout)
+		ctx, cancel := context.WithTimeout(c.ctx, c.Timeout)
+		defer cancel()
+		c.ctx = ctx
 	}
 
 	err := cmd.Start()
@@ -206,35 +216,25 @@ func (c *Command) Execute() error {
 	}
 
 	done := make(chan error, 1)
-	quit := make(chan bool, 1)
-	defer close(quit)
-
 	go func() {
 		select {
-		case <-quit:
-			return
 		case done <- cmd.Wait():
 			return
 		}
 	}()
 
 	select {
-	case err := <-done:
-		if err != nil {
-			c.getExitCode(err)
-			break
-		}
-		c.exitCode = 0
-	case <-timeoutChan:
-		quit <- true
+	case <-c.ctx.Done():
 		if err := cmd.Process.Kill(); err != nil {
 			return fmt.Errorf("Timeout occurred and can not kill process with pid %v", cmd.Process.Pid)
 		}
 		return fmt.Errorf("Command timed out after %v", c.Timeout)
+	case err := <-done:
+		if err != nil {
+			c.getExitCode(err)
+		}
 	}
-
 	c.executed = true
-
 	return nil
 }
 
