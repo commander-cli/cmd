@@ -203,8 +203,10 @@ func (c *Command) Execute() error {
 	cmd.Stderr = c.StderrWriter
 	cmd.Dir = c.WorkingDir
 
-	// Create timer only if timeout was set > 0
-	if c.Timeout != 0 {
+	// Create timer only if timeout was set > 0 and context does
+	// not have a deadline
+	_, hasDeadline := c.ctx.Deadline()
+	if c.Timeout != 0 && !hasDeadline {
 		ctx, cancel := context.WithTimeout(c.ctx, c.Timeout)
 		defer cancel()
 		c.ctx = ctx
@@ -228,12 +230,16 @@ func (c *Command) Execute() error {
 		if err := cmd.Process.Kill(); err != nil {
 			return fmt.Errorf("Timeout occurred and can not kill process with pid %v", cmd.Process.Pid)
 		}
-		return fmt.Errorf("Command timed out after %v", c.Timeout)
+		if c.Timeout != 0 && !hasDeadline {
+			return fmt.Errorf("Command timed out after %v", c.Timeout)
+		}
+		return c.ctx.Err()
 	case err := <-done:
 		if err != nil {
 			c.getExitCode(err)
 		}
 	}
+
 	c.executed = true
 	return nil
 }
