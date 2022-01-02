@@ -20,7 +20,6 @@ type Command struct {
 	StderrWriter io.Writer
 	StdoutWriter io.Writer
 	WorkingDir   string
-	ctx          context.Context
 	executed     bool
 	exitCode     int
 	// stderr and stdout retrieve the output after the command was executed
@@ -59,7 +58,6 @@ func NewCommand(cmd string, options ...func(*Command)) *Command {
 		Timeout:  30 * time.Minute,
 		executed: false,
 		Env:      []string{},
-		ctx:      context.Background(),
 	}
 
 	c.StdoutWriter = io.MultiWriter(&c.stdout, &c.combined)
@@ -145,17 +143,6 @@ func WithEnvironmentVariables(env EnvVars) func(c *Command) {
 	}
 }
 
-// WithContext adds context.Context to the command. Context timeout/deadline
-// is favored over Timeout
-func WithContext(ctx context.Context) func(c *Command) {
-	if ctx == nil {
-		panic("nil context")
-	}
-	return func(c *Command) {
-		c.ctx = ctx
-	}
-}
-
 // AddEnv adds an environment variable to the command
 // If a variable gets passed like ${VAR_NAME} the env variable will be read out by the current shell
 func (c *Command) AddEnv(key string, value string) {
@@ -198,9 +185,8 @@ func (c *Command) isExecuted(property string) {
 	}
 }
 
-// Execute executes the command and writes the results into it's own instance
-// The results can be received with the Stdout(), Stderr() and ExitCode() methods
-func (c *Command) Execute() error {
+// ExecuteContext runs Execute but with Context
+func (c *Command) ExecuteContext(ctx context.Context) error {
 	cmd := createBaseCommand(c)
 	cmd.Env = c.Env
 	cmd.Dir = c.Dir
@@ -210,11 +196,11 @@ func (c *Command) Execute() error {
 
 	// Create timer only if timeout was set > 0 and context does
 	// not have a deadline
-	_, hasDeadline := c.ctx.Deadline()
+	_, hasDeadline := ctx.Deadline()
 	if c.Timeout != 0 && !hasDeadline {
-		ctx, cancel := context.WithTimeout(c.ctx, c.Timeout)
+		subCtx, cancel := context.WithTimeout(ctx, c.Timeout)
 		defer cancel()
-		c.ctx = ctx
+		ctx = subCtx
 	}
 
 	err := cmd.Start()
@@ -228,14 +214,14 @@ func (c *Command) Execute() error {
 	}()
 
 	select {
-	case <-c.ctx.Done():
+	case <-ctx.Done():
 		if err := cmd.Process.Kill(); err != nil {
 			return fmt.Errorf("Timeout occurred and can not kill process with pid %v", cmd.Process.Pid)
 		}
 		if c.Timeout != 0 && !hasDeadline {
 			return fmt.Errorf("Command timed out after %v", c.Timeout)
 		}
-		return c.ctx.Err()
+		return ctx.Err()
 	case err := <-done:
 		if err != nil {
 			c.getExitCode(err)
@@ -243,6 +229,12 @@ func (c *Command) Execute() error {
 	}
 	c.executed = true
 	return nil
+}
+
+// Execute executes the command and writes the results into it's own instance
+// The results can be received with the Stdout(), Stderr() and ExitCode() methods
+func (c *Command) Execute() error {
+	return c.ExecuteContext(context.Background())
 }
 
 func (c *Command) getExitCode(err error) {
