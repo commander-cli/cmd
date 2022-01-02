@@ -2,8 +2,6 @@ exe = cmd/operator/*
 cmd = operator
 TRAVIS_TAG ?= "0.0.0"
 
-.PHONY: deps lint test integration integration-windows git-hooks init
-
 init: git-hooks
 
 git-hooks:
@@ -33,3 +31,5 @@ test-windows:
 test-coverage:
 	$(info INFO: Starting build $@)
 	go test -coverprofile c.out `go list ./... | grep -v examples`
+
+.PHONY: deps lint test integration integration-windows git-hooks init
