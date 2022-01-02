@@ -133,12 +133,14 @@ func TestCommand_SetOptions(t *testing.T) {
 }
 
 func TestCommand_WithContext(t *testing.T) {
-	// Ensure context is favored over WithTimeout
+	// ensure legacy timeout is honored
 	cmd := NewCommand("sleep 3;", WithTimeout(1*time.Second))
 	err := cmd.Execute()
 	assert.NotNil(t, err)
 	assert.Equal(t, "Command timed out after 1s", err.Error())
 
+	// set context timeout to 2 seconds to ensure
+	// context takes precedence over timeout
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 	err = cmd.ExecuteContext(ctx)

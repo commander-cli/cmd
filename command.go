@@ -194,10 +194,10 @@ func (c *Command) ExecuteContext(ctx context.Context) error {
 	cmd.Stderr = c.StderrWriter
 	cmd.Dir = c.WorkingDir
 
-	// Create timer only if timeout was set > 0 and context does
-	// not have a deadline
+	// Respect legacy timer setting only if timeout was set > 0
+	// and context does not have a deadline
 	_, hasDeadline := ctx.Deadline()
-	if c.Timeout != 0 && !hasDeadline {
+	if c.Timeout > 0 && !hasDeadline {
 		subCtx, cancel := context.WithTimeout(ctx, c.Timeout)
 		defer cancel()
 		ctx = subCtx
@@ -209,24 +209,23 @@ func (c *Command) ExecuteContext(ctx context.Context) error {
 	}
 
 	done := make(chan error, 1)
-	go func() {
-		done <- cmd.Wait()
-	}()
+	go func() { done <- cmd.Wait() }()
 
 	select {
 	case <-ctx.Done():
 		if err := cmd.Process.Kill(); err != nil {
 			return fmt.Errorf("Timeout occurred and can not kill process with pid %v", cmd.Process.Pid)
 		}
-		if c.Timeout != 0 && !hasDeadline {
-			return fmt.Errorf("Command timed out after %v", c.Timeout)
+
+		err := ctx.Err()
+		if c.Timeout > 0 && !hasDeadline {
+			err = fmt.Errorf("Command timed out after %v", c.Timeout)
 		}
-		return ctx.Err()
+		return err
 	case err := <-done:
-		if err != nil {
-			c.getExitCode(err)
-		}
+		c.getExitCode(err)
 	}
+
 	c.executed = true
 	return nil
 }
