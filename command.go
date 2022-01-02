@@ -145,7 +145,12 @@ func WithEnvironmentVariables(env EnvVars) func(c *Command) {
 	}
 }
 
+// WithContext adds context.Context to the command. Context timeout/deadline
+// is favored over Timeout
 func WithContext(ctx context.Context) func(c *Command) {
+	if ctx == nil {
+		panic("nil context")
+	}
 	return func(c *Command) {
 		c.ctx = ctx
 	}
@@ -219,10 +224,7 @@ func (c *Command) Execute() error {
 
 	done := make(chan error, 1)
 	go func() {
-		select {
-		case done <- cmd.Wait():
-			return
-		}
+		done <- cmd.Wait()
 	}()
 
 	select {
@@ -239,7 +241,6 @@ func (c *Command) Execute() error {
 			c.getExitCode(err)
 		}
 	}
-
 	c.executed = true
 	return nil
 }
