@@ -36,7 +36,7 @@ jobs:
 
     - name: Unit tests
       before_script:
-        - curl https://s3.amazonaws.com/codeclimate/test-reporter/test-reporter-0.6.3-linux-amd64 --output test-reporter
+        - curl https://s3.amazonaws.com/codeclimate/test-reporter/test-reporter-0.10.1-linux-amd64 --output test-reporter
         - chmod +x test-reporter
         - ./test-reporter before-build
       script:
