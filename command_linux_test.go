@@ -2,12 +2,14 @@ package cmd
 
 import (
 	"bytes"
-	"github.com/stretchr/testify/assert"
+	"context"
 	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCommand_ExecuteStderr(t *testing.T) {
@@ -137,4 +139,20 @@ func TestWithEnvironmentVariables(t *testing.T) {
 	c.Execute()
 
 	assertEqualWithLineBreak(t, "value", c.Stdout())
+}
+
+func TestCommand_WithContext(t *testing.T) {
+	// ensure legacy timeout is honored
+	cmd := NewCommand("sleep 3;", WithTimeout(1*time.Second))
+	err := cmd.Execute()
+	assert.NotNil(t, err)
+	assert.Equal(t, "Command timed out after 1s", err.Error())
+
+	// set context timeout to 2 seconds to ensure
+	// context takes precedence over timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	err = cmd.ExecuteContext(ctx)
+	assert.NotNil(t, err)
+	assert.Equal(t, "context deadline exceeded", err.Error())
 }
