@@ -1,4 +1,3 @@
-[![Build Status](https://app.travis-ci.com/commander-cli/cmd.svg?branch=master)](https://travis-ci.org/commander-cli/cmd)
 [![GoDoc](https://godoc.org/github.com/commander-cli/cmd?status.svg)](https://godoc.org/github.com/commander-cli/cmd)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/af3487439a313d580619/test_coverage)](https://codeclimate.com/github/commander-cli/cmd/test_coverage)
 [![Maintainability](https://api.codeclimate.com/v1/badges/af3487439a313d580619/maintainability)](https://codeclimate.com/github/commander-cli/cmd/maintainability)
