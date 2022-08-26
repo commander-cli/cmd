@@ -32,6 +32,7 @@ To configure the command a option function will be passed which receives the com
 
 Default option functions:
 
+ - `cmd.WithCustomBaseCommand(*exec.Cmd)`
  - `cmd.WithStandardStreams`
  - `cmd.WithCustomStdout(...io.Writers)`
  - `cmd.WithCustomStderr(...io.Writers)`

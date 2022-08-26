@@ -72,6 +72,17 @@ func NewCommand(cmd string, options ...func(*Command)) *Command {
 	return c
 }
 
+// WithCustomBaseCommand allows the OS specific generated baseCommand
+// to be overridden by an *os/exec.Cmd.
+//
+// Example:
+//
+//      c := cmd.NewCommand(
+//        "echo hello",
+//        cmd.WithCustomBaseCommand(exec.Command("/bin/bash", "-c")),
+//      )
+//      c.Execute()
+//
 func WithCustomBaseCommand(baseCommand *exec.Cmd) func(c *Command) {
 	return func(c *Command) {
 		baseCommand.Args = append(baseCommand.Args, c.Command)
