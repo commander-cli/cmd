@@ -1,5 +1,6 @@
+[![CI](https://github.com/commander-cli/cmd/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/commander-cli/cmd/actions/workflows/ci.yml)
 [![GoDoc](https://godoc.org/github.com/commander-cli/cmd?status.svg)](https://godoc.org/github.com/commander-cli/cmd)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/af3487439a313d580619/test_coverage)](https://codeclimate.com/github/commander-cli/cmd/test_coverage)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/31911138f62cea099c31/test_coverage)](https://codeclimate.com/github/commander-cli/cmd/test_coverage)
 [![Maintainability](https://api.codeclimate.com/v1/badges/af3487439a313d580619/maintainability)](https://codeclimate.com/github/commander-cli/cmd/maintainability)
 [![Go Report Card](https://goreportcard.com/badge/github.com/commander-cli/cmd)](https://goreportcard.com/report/github.com/commander-cli/cmd)
 
