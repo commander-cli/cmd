@@ -20,6 +20,7 @@ type Command struct {
 	StderrWriter io.Writer
 	StdoutWriter io.Writer
 	WorkingDir   string
+	baseCommand  *exec.Cmd
 	executed     bool
 	exitCode     int
 	// stderr and stdout retrieve the output after the command was executed
@@ -60,6 +61,7 @@ func NewCommand(cmd string, options ...func(*Command)) *Command {
 		Env:      []string{},
 	}
 
+	c.baseCommand = createBaseCommand(c)
 	c.StdoutWriter = io.MultiWriter(&c.stdout, &c.combined)
 	c.StderrWriter = io.MultiWriter(&c.stderr, &c.combined)
 
@@ -68,6 +70,13 @@ func NewCommand(cmd string, options ...func(*Command)) *Command {
 	}
 
 	return c
+}
+
+func WithCustomBaseCommand(baseCommand *exec.Cmd) func(c *Command) {
+	return func(c *Command) {
+		baseCommand.Args = append(baseCommand.Args, c.Command)
+		c.baseCommand = baseCommand
+	}
 }
 
 // WithStandardStreams is used as an option by the NewCommand constructor function and writes the output streams
@@ -187,7 +196,7 @@ func (c *Command) isExecuted(property string) {
 
 // ExecuteContext runs Execute but with Context
 func (c *Command) ExecuteContext(ctx context.Context) error {
-	cmd := createBaseCommand(c)
+	cmd := c.baseCommand
 	cmd.Env = c.Env
 	cmd.Dir = c.Dir
 	cmd.Stdout = c.StdoutWriter
