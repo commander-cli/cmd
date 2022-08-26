@@ -152,6 +152,7 @@ func TestCommand_WithContext(t *testing.T) {
 	// context takes precedence over timeout
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
+	cmd = NewCommand("sleep 3;", WithTimeout(1*time.Second))
 	err = cmd.ExecuteContext(ctx)
 	assert.NotNil(t, err)
 	assert.Equal(t, "context deadline exceeded", err.Error())
