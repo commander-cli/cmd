@@ -5,6 +5,7 @@ import (
 	"context"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"strings"
 	"testing"
 	"time"
@@ -156,4 +157,17 @@ func TestCommand_WithContext(t *testing.T) {
 	err = cmd.ExecuteContext(ctx)
 	assert.NotNil(t, err)
 	assert.Equal(t, "context deadline exceeded", err.Error())
+}
+
+func TestCommand_WithCustomBaseCommand(t *testing.T) {
+	cmd := NewCommand(
+		"echo $0",
+		WithCustomBaseCommand(exec.Command("/bin/bash", "-c")),
+	)
+
+	err := cmd.Execute()
+	assert.Nil(t, err)
+	// on darwin we use /bin/sh by default test if we're using bash
+	assert.NotEqual(t, "/bin/sh\n", cmd.Stdout())
+	assert.Equal(t, "/bin/bash\n", cmd.Stdout())
 }
