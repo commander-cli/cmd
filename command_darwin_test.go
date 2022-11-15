@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"syscall"
 	"testing"
 	"time"
 
@@ -31,4 +32,14 @@ func TestCommand_WithValidTimeout(t *testing.T) {
 	err := cmd.Execute()
 
 	assert.Nil(t, err)
+}
+
+// I really don't see the point of mocking this
+// as the stdlib does so already. So testing here
+// seems redundant. This simple check if we're compliant
+// with an api changes
+func TestCommand_WithUser(t *testing.T) {
+	cmd := NewCommand("echo hello", WithUser(syscall.Credential{}))
+	err := cmd.Execute()
+	assert.Error(t, err)
 }
