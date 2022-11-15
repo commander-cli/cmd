@@ -10,7 +10,9 @@ A simple package to execute shell commands on linux, darwin and windows.
 
 ## Installation
 
-`$ go get -u github.com/commander-cli/cmd@v1.5.0`
+```bash
+$ go get -u github.com/commander-cli/cmd@v1.5.0
+```
 
 ## Usage
 
