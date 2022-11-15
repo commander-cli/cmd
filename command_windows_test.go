@@ -1,10 +1,13 @@
 package cmd
 
 import (
-	"github.com/stretchr/testify/assert"
 	"strings"
+	"syscall"
 	"testing"
 	"time"
+	"unsafe"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCommand_ExecuteStderr(t *testing.T) {
@@ -33,4 +36,12 @@ func TestCommand_WithValidTimeout(t *testing.T) {
 	err := cmd.Execute()
 
 	assert.Nil(t, err)
+}
+
+func TestCommand_WithUser(t *testing.T) {
+	onehundred := 100
+	token := syscall.Token(uintptr(unsafe.Pointer(&onehundred)))
+	cmd := NewCommand("echo hello", WithUser(token))
+	err := cmd.Execute()
+	assert.Error(t, err)
 }
