@@ -11,6 +11,19 @@ import (
 	"time"
 )
 
+type CommandInterface interface {
+	AddEnv(string, string)
+	Stdout() string
+	Stderr() string
+	Combined() string
+	ExitCode() int
+	Executed() bool
+	ExecuteContext(context.Context) error
+	Execute() error
+}
+
+var _ CommandInterface = (*Command)(nil)
+
 // Command represents a single command which can be executed
 type Command struct {
 	Command      string
@@ -165,7 +178,7 @@ func WithEnvironmentVariables(env EnvVars) func(c *Command) {
 
 // AddEnv adds an environment variable to the command
 // If a variable gets passed like ${VAR_NAME} the env variable will be read out by the current shell
-func (c *Command) AddEnv(key string, value string) {
+func (c *Command) AddEnv(key, value string) {
 	value = os.ExpandEnv(value)
 	c.Env = append(c.Env, fmt.Sprintf("%s=%s", key, value))
 }
