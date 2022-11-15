@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"syscall"
 	"testing"
 	"time"
 
@@ -170,4 +171,11 @@ func TestCommand_WithCustomBaseCommand(t *testing.T) {
 	// on darwin we use /bin/sh by default test if we're using bash
 	assert.NotEqual(t, "/bin/sh\n", cmd.Stdout())
 	assert.Equal(t, "/bin/bash\n", cmd.Stdout())
+}
+
+func TestCommand_WithUser(t *testing.T) {
+	cred := syscall.Credential{}
+	cmd := NewCommand("echo hello", WithUser(cred))
+	err := cmd.Execute()
+	assert.Error(t, err)
 }
