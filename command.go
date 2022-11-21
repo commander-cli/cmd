@@ -113,7 +113,7 @@ func WithCustomBaseCommand(baseCommand *exec.Cmd) func(c *Command) {
 //
 func WithStandardStreams(c *Command) {
 	c.StdoutWriter = io.MultiWriter(os.Stdout, &c.stdout, &c.combined)
-	c.StderrWriter = io.MultiWriter(os.Stderr, &c.stdout, &c.combined)
+	c.StderrWriter = io.MultiWriter(os.Stderr, &c.stderr, &c.combined)
 }
 
 // WithCustomStdout allows to add custom writers to stdout
