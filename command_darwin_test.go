@@ -36,8 +36,8 @@ func TestCommand_WithValidTimeout(t *testing.T) {
 
 // I really don't see the point of mocking this
 // as the stdlib does so already. So testing here
-// seems redundant. This simple check if we're compliant
-// with an api changes
+// seems redundant. This simply checks if we're compliant
+// with api changes
 func TestCommand_WithUser(t *testing.T) {
 	cmd := NewCommand("echo hello", WithUser(syscall.Credential{}))
 	err := cmd.Execute()
