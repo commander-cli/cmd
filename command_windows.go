@@ -10,6 +10,14 @@ func createBaseCommand(c *Command) *exec.Cmd {
 	return cmd
 }
 
+// WithUser allows the command to be run as a different
+// user.
+//
+// Example:
+//
+//	token := syscall.Token(handle)
+//	c := NewCommand("echo hello", token)
+//	c.Execute()
 func WithUser(token syscall.Token) func(c *Command) {
 	return func(c *Command) {
 		c.baseCommand.SysProcAttr = &syscall.SysProcAttr{
