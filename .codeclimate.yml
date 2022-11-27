@@ -1,0 +1,6 @@
+exclude_patterns:
+  - "*_darwin.go"
+  - "*_linux.go"
+  - "*_windows.go"
+  - "vendor/*"
+  - "*_test.go"
