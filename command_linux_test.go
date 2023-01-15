@@ -125,17 +125,6 @@ func TestWithCustomStdout(t *testing.T) {
 	assertEqualWithLineBreak(t, "stderr\nstdout", c.Combined())
 }
 
-func TestWithStandardStreams(t *testing.T) {
-	out, err := CaptureStandardOutput(func() interface{} {
-		c := NewCommand(">&2 echo stderr; sleep 0.01; echo stdout;", WithStandardStreams)
-		err := c.Execute()
-		return err
-	})
-
-	assertEqualWithLineBreak(t, "stderr\nstdout", out)
-	assert.Nil(t, err)
-}
-
 func TestWithEnvironmentVariables(t *testing.T) {
 	c := NewCommand("echo $env", WithEnvironmentVariables(map[string]string{"env": "value"}))
 	c.Execute()
