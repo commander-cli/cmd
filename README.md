@@ -10,8 +10,16 @@ A simple package to execute shell commands on linux, darwin and windows.
 
 ## Installation
 
+Install the latest version with:
+
 ```bash
-$ go get -u github.com/commander-cli/cmd@v1.5.0
+$ go get -u github.com/commander-cli/cmd
+```
+
+or an exact version:
+
+```bash
+$ go get -u github.com/commander-cli/cmd@v1.0.0
 ```
 
 ## Usage
@@ -30,19 +38,24 @@ fmt.Println(c.Stderr())
 
 ### Configure the command
 
-To configure the command a option function will be passed which receives the command object as an argument passed by reference.
+To configure the command an option function can be passed which receives the
+command object as an argument passed by reference.
 
 Default option functions:
 
- - `cmd.WithCustomBaseCommand(*exec.Cmd)`
- - `cmd.WithStandardStreams`
- - `cmd.WithCustomStdout(...io.Writers)`
- - `cmd.WithCustomStderr(...io.Writers)`
- - `cmd.WithTimeout(time.Duration)`
- - `cmd.WithoutTimeout`
- - `cmd.WithWorkingDir(string)`
- - `cmd.WithEnvironmentVariables(cmd.EnvVars)`
- - `cmd.WithInheritedEnvironment(cmd.EnvVars)`
+```
+cmd.WithCustomBaseCommand(*exec.Cmd)
+cmd.WithStandardStreams
+cmd.WithCustomStdout(...io.Writers)
+cmd.WithCustomStderr(...io.Writers)
+cmd.WithTimeout(time.Duration)
+cmd.WithoutTimeout
+cmd.WithWorkingDir(string)
+cmd.WithEnvironmentVariables(cmd.EnvVars)
+cmd.WithInheritedEnvironment(cmd.EnvVars)
+```
+
+See [godocs for details][].
 
 #### Example
 
@@ -62,31 +75,37 @@ c := cmd.NewCommand("pwd", setWorkingDir)
 c.Execute()
 ```
 
-### Testing
+## Contributing
 
-You can catch output streams to `stdout` and `stderr` with `cmd.CaptureStandardOut`. 
+If you would like to contribute please submit a pull request.
+For bug fixes/minor changes a simple pull request will
+suffice. If the change is large or you would like to have a feature
+discussion before implementation feel free to open an issue.
 
-```golang
-// caputred is the captured output from all executed source code
-// fnResult contains the result of the executed function
-captured, fnResult := cmd.CaptureStandardOut(func() interface{} {
-    c := NewCommand("echo hello", cmd.WithStandardStream)
-    err := c.Execute()
-    return err
-})
+If you have a feature request or bug report please open an issue.
 
-// prints "hello"
-fmt.Println(captured)
+### Development
+
+Please fork the project and do your development there. Please use a
+meaningful branch name as well as adhere to [commitlint rules][].
+
+If you would like the precommit hooks run:
+
+```
+make init
 ```
 
-## Development
-
-### Running tests
+To run the test suite:
 
 ```
 make test
 ```
 
-### ToDo
+*Reminder:* The goal of this project is to ensure we abstract the OS specific
+command execution as mush as possible. Ensure your change is compatible
+with linux, windows and osx. If unable to test on every operating system
+(help needed for windows (:) the CI will take care of that for you.
 
- - os.Stdout and os.Stderr output access after execution via `c.Stdout()` and `c.Stderr()`
+[commitlint rules]: https://www.conventionalcommits.org/en/v1.0.0/
+[godocs for details]: https://godoc.org/github.com/commander-cli/cmd
+
