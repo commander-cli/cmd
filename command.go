@@ -240,6 +240,7 @@ func (c *Command) ExecuteContext(ctx context.Context) error {
 
 	done := make(chan error, 1)
 	go func() { done <- cmd.Wait() }()
+	c.executed = true
 
 	select {
 	case <-ctx.Done():
@@ -256,7 +257,6 @@ func (c *Command) ExecuteContext(ctx context.Context) error {
 		c.getExitCode(err)
 	}
 
-	c.executed = true
 	return nil
 }
 
