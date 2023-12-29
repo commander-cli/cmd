@@ -16,7 +16,7 @@ func createBaseCommand(c *Command) *exec.Cmd {
 // Example:
 //
 //	token := syscall.Token(handle)
-//	c := NewCommand("echo hello", token)
+//	c := NewCommand("echo hello", WithUser(token))
 //	c.Execute()
 func WithUser(token syscall.Token) func(c *Command) {
 	return func(c *Command) {

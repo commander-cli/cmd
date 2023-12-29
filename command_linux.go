@@ -16,7 +16,7 @@ func createBaseCommand(c *Command) *exec.Cmd {
 // Example:
 //
 //	cred := syscall.Credential{Uid: 1000, Gid: 1000}
-//	c := NewCommand("echo hello", cred)
+//	c := NewCommand("echo hello", WithUser(cred))
 //	c.Execute()
 func WithUser(credential syscall.Credential) func(c *Command) {
 	return func(c *Command) {
