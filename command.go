@@ -1,3 +1,6 @@
+// Package cmd is a simple package
+// to execute shell commeand on linux,
+// windows, and osx.
 package cmd
 
 import (
@@ -245,12 +248,12 @@ func (c *Command) ExecuteContext(ctx context.Context) error {
 	select {
 	case <-ctx.Done():
 		if err := cmd.Process.Kill(); err != nil {
-			return fmt.Errorf("Timeout occurred and can not kill process with pid %v", cmd.Process.Pid)
+			return fmt.Errorf("timeout occurred and can not kill process with pid %v", cmd.Process.Pid)
 		}
 
 		err := ctx.Err()
 		if c.Timeout > 0 && !hasDeadline {
-			err = fmt.Errorf("Command timed out after %v", c.Timeout)
+			err = fmt.Errorf("command timed out after %v", c.Timeout)
 		}
 		return err
 	case err := <-done:

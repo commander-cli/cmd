@@ -1,13 +1,16 @@
-name: commit_lint
-on: [pull_request]
+name: lint
 
-permissions:
-  contents: read
-  pull-requests: read
+on:
+  pull_request:
+  push:
+    branches:
+      - "main"
 
 jobs:
-  commitlint:
+  staticcheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: wagoid/commitlint-github-action@v5
+      - uses: actions/setup-go@v3
+      - run: go install honnef.co/go/tools/cmd/staticcheck@latest
+      - run: ~/go/bin/staticcheck -checks all
