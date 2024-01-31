@@ -10,7 +10,6 @@ import (
 
 func TestCommand_ExecuteStderr(t *testing.T) {
 	cmd := NewCommand(">&2 echo hello")
-
 	err := cmd.Execute()
 
 	assert.Nil(t, err)
@@ -23,7 +22,7 @@ func TestCommand_WithTimeout(t *testing.T) {
 	err := cmd.Execute()
 
 	assert.NotNil(t, err)
-	assert.Equal(t, "Command timed out after 5ms", err.Error())
+	assert.Equal(t, "command timed out after 5ms", err.Error())
 }
 
 func TestCommand_WithValidTimeout(t *testing.T) {

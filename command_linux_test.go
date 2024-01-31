@@ -3,7 +3,6 @@ package cmd
 import (
 	"bytes"
 	"context"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
@@ -12,6 +11,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCommand_ExecuteStderr(t *testing.T) {
@@ -27,10 +27,9 @@ func TestCommand_WithTimeout(t *testing.T) {
 	cmd := NewCommand("sleep 0.1;", WithTimeout(1*time.Millisecond))
 
 	err := cmd.Execute()
-
 	assert.NotNil(t, err)
 	// Sadly a process can not be killed every time :(
-	containsMsg := strings.Contains(err.Error(), "Timeout occurred and can not kill process with pid") || strings.Contains(err.Error(), "Command timed out after 1ms")
+	containsMsg := strings.Contains(err.Error(), "timeout occurred and can not kill process with pid") || strings.Contains(err.Error(), "command timed out after 1ms")
 	assert.True(t, containsMsg)
 }
 
@@ -54,7 +53,8 @@ func TestCommand_WithWorkingDir(t *testing.T) {
 }
 
 func TestCommand_WithStandardStreams(t *testing.T) {
-	tmpFile, _ := ioutil.TempFile("/tmp", "stdout_")
+	tmpFile, err := os.CreateTemp("/tmp", "stdout_")
+	require.NoError(t, err)
 	originalStdout := os.Stdout
 	os.Stdout = tmpFile
 
@@ -66,8 +66,8 @@ func TestCommand_WithStandardStreams(t *testing.T) {
 	cmd := NewCommand("echo hey", WithStandardStreams)
 	cmd.Execute()
 
-	r, err := ioutil.ReadFile(tmpFile.Name())
-	assert.Nil(t, err)
+	r, err := os.ReadFile(tmpFile.Name())
+	require.NoError(t, err)
 	assert.Equal(t, "hey\n", string(r))
 }
 
@@ -137,7 +137,7 @@ func TestCommand_WithContext(t *testing.T) {
 	cmd := NewCommand("sleep 3;", WithTimeout(1*time.Second))
 	err := cmd.Execute()
 	assert.NotNil(t, err)
-	assert.Equal(t, "Command timed out after 1s", err.Error())
+	assert.Equal(t, "command timed out after 1s", err.Error())
 
 	// set context timeout to 2 seconds to ensure
 	// context takes precedence over timeout
